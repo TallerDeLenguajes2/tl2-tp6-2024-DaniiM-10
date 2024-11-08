@@ -1,5 +1,5 @@
 using Microsoft.Data.Sqlite;
-namespace TP5.Models;
+namespace TP6.Models;
 
 public class PresupuestosRepository 
 {
@@ -113,10 +113,10 @@ public class PresupuestosRepository
         }
     }
 
-    public bool PostPresupuestoDetalle(int idPresupuesto, PresupuestosDetallesPost presupuestosDetalles) {
+    public bool PostPresupuestoDetalle(int idPresupuesto, PresupuestosDetalles presupuestosDetalles) {
         try
         {
-            Productos producto = productosRepository.GetProducto(presupuestosDetalles.idProducto);
+            Productos producto = productosRepository.GetProducto(presupuestosDetalles.producto.idProducto);
             Presupuestos presupuesto = GetPresupuesto(idPresupuesto);
 
             if (producto == null || presupuesto == null) return false;
@@ -131,7 +131,7 @@ public class PresupuestosRepository
                     using (SqliteCommand command = new SqliteCommand(queryString, connection, transaction))
                     {
                         command.Parameters.AddWithValue("@idPresupuesto", idPresupuesto);
-                        command.Parameters.AddWithValue("@idProducto", presupuestosDetalles.idProducto);
+                        command.Parameters.AddWithValue("@idProducto", presupuestosDetalles.producto.idProducto);
                         command.Parameters.AddWithValue("@Cantidad", presupuestosDetalles.cantidad);
                         command.ExecuteNonQuery();
                     }
@@ -232,11 +232,11 @@ public class PresupuestosRepository
                             }
 
                             Productos product = new Productos();
-                            product.setIdProducto(Convert.ToInt32(reader["idProducto"]));
+                            product.idProducto = Convert.ToInt32(reader["idProducto"]);
                             product.Descripcion = reader["Descripcion"].ToString();
                             product.Precio = Convert.ToInt32(reader["Precio"]);
 
-                            pd.SetProducto(product);
+                            pd.producto = product;
                             pd.cantidad = Convert.ToInt32(reader["Cantidad"]);
 
                             pdList.Add(pd);

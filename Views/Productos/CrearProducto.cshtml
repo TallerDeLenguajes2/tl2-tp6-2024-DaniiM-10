@@ -1,0 +1,19 @@
+@using TP6.Models
+@model Productos;
+
+<form asp-asp-controller="Productos" asp-action="CrearProducto">
+    <div class="form-group">
+        <label asp-for="@Model.Descripcion" class="control-label"></label>
+        <input asp-for="@Model.Descripcion" class="form-control"/>
+        <span asp-validation-for="Descripcion" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="@Model.Precio" class="control-label"></label>
+        <input asp-for="@Model.Precio" class="form-control"/>
+        <span asp-validation-for="Precio" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Crear</button>
+    <a href="@Url.Action("Index")" class="btn btn-secondary">Cancelar</a>
+</form>

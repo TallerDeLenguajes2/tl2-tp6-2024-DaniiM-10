@@ -1,15 +1,6 @@
-namespace TP5.Models;
+namespace TP6.Models;
 
 public class PresupuestosDetalles {
-    private Productos productoPrivate;
-    public PresupuestosDetalles() {
-        this.productoPrivate = new Productos();
-    }
-
-    public Productos producto { get => productoPrivate; }
+    public Productos producto { get; set; } = new Productos();
     public int cantidad { get; set; }
-
-    public void SetProducto(Productos producto) {
-        this.productoPrivate = producto;
-    }
 }

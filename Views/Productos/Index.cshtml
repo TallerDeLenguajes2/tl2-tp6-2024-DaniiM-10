@@ -1,0 +1,28 @@
+@using TP6.Models
+@model List<Productos>;
+
+@{
+    ViewData["Title"] = "Todos los productos";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Precio</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var producto in Model)
+        {
+            <tr>
+                <td>@producto.Descripcion</td> <!-- Asegúrate de que sea 'Nombre' si ese es el campo correcto -->
+                <td>$@producto.Precio</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+

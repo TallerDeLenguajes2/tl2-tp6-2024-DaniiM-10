@@ -1,5 +1,5 @@
 using Microsoft.Data.Sqlite;
-namespace TP5.Models;
+namespace TP6.Models;
 
 public class ProductosRepository
 {
@@ -24,7 +24,7 @@ public class ProductosRepository
                     while (reader.Read())
                     {
                         Productos producto = new Productos();
-                        producto.setIdProducto(Convert.ToInt32(reader["idProducto"]));
+                        producto.idProducto = (Convert.ToInt32(reader["idProducto"]));
                         producto.Descripcion = reader["Descripcion"].ToString();
                         producto.Precio = Convert.ToInt32(reader["Precio"]);
                         productos.Add(producto);
@@ -111,7 +111,7 @@ public class ProductosRepository
                     if (reader.Read())
                     {
                         Productos producto = new Productos();
-                        producto.setIdProducto(Convert.ToInt32(reader["idProducto"]));
+                        producto.idProducto = (Convert.ToInt32(reader["idProducto"]));
                         producto.Descripcion = reader["Descripcion"].ToString();
                         producto.Precio = Convert.ToInt32(reader["Precio"]);
                         return producto;

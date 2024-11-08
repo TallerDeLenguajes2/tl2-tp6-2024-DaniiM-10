@@ -1,4 +1,4 @@
-namespace TP5.Models;
+namespace TP6.Models;
 
 public class Presupuestos {
     private List<PresupuestosDetalles> DetallesPrivate;
