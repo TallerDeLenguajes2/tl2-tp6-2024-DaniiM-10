@@ -12,17 +12,26 @@
         <tr>
             <th>Nombre</th>
             <th>Precio</th>
+            <th>Editar</th>
+            <th>Eliminar</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var producto in Model)
         {
             <tr>
-                <td>@producto.Descripcion</td> <!-- Asegúrate de que sea 'Nombre' si ese es el campo correcto -->
+                <td>@producto.Descripcion</td>
                 <td>$@producto.Precio</td>
+                <td>
+                    <a class="btn btn-primary" asp-controller="Productos" asp-action="EditarProducto"
+                    asp-route-idProducto="@producto.idProducto">Editar</a>
+                </td>
+                <td>
+                    <a class="btn btn-danger" asp-controller="Productos" asp-action="EliminarProducto"
+                    asp-route-idProducto="@producto.idProducto"
+                    onclick="return confirm('¿Estas seguro que quieres eliminar el elemento?')">Eliminar</a>
+                </td>
             </tr>
         }
     </tbody>
 </table>
-
-

@@ -20,19 +20,33 @@ public class PresupuestosController : Controller
     }
 
     [HttpGet]
-    public IActionResult PresupuestoId(int idPresupuesto)
-    {
-        return View(presupuestosRepository.GetPresupuesto(idPresupuesto));
-    }
-
-    [HttpGet]
     public IActionResult CrearPresupuesto()
     {
-        return View(new Productos());
+        return View(new Presupuestos());
     }
     [HttpPost]
     public IActionResult CrearPresupuesto(Presupuestos presupuesto)
     {
-        return View(presupuestosRepository.PostPresupuesto(presupuesto));
+        var success = presupuestosRepository.PostPresupuesto(presupuesto);
+        return RedirectToAction("Index");
+    }
+
+    /*[HttpGet]
+    public IActionResult EditarPresupuesto(int idPresupuesto)
+    {
+        Presupuestos presupuesto = presupuestosRepository.GetPresupuesto(idPresupuesto);
+        return View(presupuesto);
+    }
+    [HttpPost]
+    public IActionResult EditarPresupuesto(Productos producto)
+    {
+        var success = presupuestosRepository.(producto.idPresupuesto, producto);
+        return RedirectToAction("Index");
+    }*/
+
+    public IActionResult EliminarPresupuesto(int idPresupuesto)
+    {
+        var success = presupuestosRepository.DeletePresupuesto(idPresupuesto);
+        return RedirectToAction("Index");
     }
 }

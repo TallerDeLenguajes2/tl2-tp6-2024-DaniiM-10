@@ -1,0 +1,19 @@
+@using TP6.Models
+@model Presupuestos;
+
+@{
+    Model.FechaCreacion = DateTime.Now; // Set the current date
+}
+
+<form asp-controller="Presupuestos" asp-action="CrearPresupuesto">
+    <div class="form-group">
+        <label asp-for="@Model.NombreDestinatario" class="control-label"></label>
+        <input asp-for="@Model.NombreDestinatario" class="form-control" />
+        <span asp-validation-for="NombreDestinatario" class="text-danger"></span>
+    </div>
+
+    <input type="hidden" asp-for="@Model.FechaCreacion" />
+
+    <button type="submit" class="btn btn-primary">Crear</button>
+    <a href="@Url.Action("Index")" class="btn btn-secondary">Cancelar</a>
+</form>

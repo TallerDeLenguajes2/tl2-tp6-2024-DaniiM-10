@@ -37,10 +37,16 @@ public class ProductosController : Controller
         Productos producto = productosRepository.GetProducto(idProducto);
         return View(producto);
     }
-    [HttpPut]
+    [HttpPost]
     public IActionResult EditarProducto(Productos producto)
     {
         var success = productosRepository.PutProducto(producto.idProducto, producto);
+        return RedirectToAction("Index");
+    }
+
+    public IActionResult EliminarProducto(int idProducto)
+    {
+        var success = productosRepository.DeleteProducto(idProducto);
         return RedirectToAction("Index");
     }
 }
