@@ -41,7 +41,6 @@ public class ProductosController : Controller
         }
     }
 
-
     [HttpGet]
     public IActionResult EditarProducto(int idProducto)
     {
@@ -70,14 +69,7 @@ public class ProductosController : Controller
     {
         var success = productosRepository.DeleteProducto(idProducto);
 
-        if (success)
-        {
-            return RedirectToAction("Index");
-        }
-        else
-        {
-            ModelState.AddModelError("", "Hubo un problema al eliminar el producto. Por favor, intente nuevamente.");
-            return RedirectToAction("Index");
-        }
+        if (!success) { ModelState.AddModelError("", "Hubo un problema al eliminar el producto. Por favor, intente nuevamente."); }
+        return RedirectToAction("Index");
     }
 }

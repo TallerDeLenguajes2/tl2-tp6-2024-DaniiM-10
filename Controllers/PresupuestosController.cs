@@ -29,26 +29,50 @@ public class PresupuestosController : Controller
     [HttpPost]
     public IActionResult CrearPresupuesto(Presupuestos presupuesto)
     {
+        if (!ModelState.IsValid) { return View(presupuesto); }
+
         var success = presupuestosRepository.PostPresupuesto(presupuesto);
-        return (success) ? RedirectToAction("Index") : RedirectToAction("CrearPresupuesto");
+
+        if (success)
+        {
+            return RedirectToAction("Index");
+        }
+        else
+        {
+            ModelState.AddModelError("", "Hubo un problema al crear el presupuesto. Por favor, intente nuevamente.");
+            return View(presupuesto);
+        }
     }
 
     [HttpGet]
     public IActionResult EditarPresupuesto(int idPresupuesto)
     {
         Presupuestos presupuesto = presupuestosRepository.GetPresupuesto(idPresupuesto);
+        if (presupuesto == null) { return NotFound(); }
         return View(presupuesto);
     }
     [HttpPost]
     public IActionResult EditarPresupuesto(Presupuestos presupuesto)
     {
+        if (!ModelState.IsValid) { return View(presupuesto); }
+
         var success = presupuestosRepository.PutPresupuesto(presupuesto);
-        return (success) ? RedirectToAction("Index") : RedirectToAction("EditarPresupuesto");
+        if (success)
+        {
+            return RedirectToAction("Index");
+        }
+        else
+        {
+            ModelState.AddModelError("", "Hubo un problema al actualizar el presupuesto. Por favor, intente nuevamente.");
+            return View(presupuesto);
+        }
     }
 
     public IActionResult EliminarPresupuesto(int idPresupuesto)
     {
         var success = presupuestosRepository.DeletePresupuesto(idPresupuesto);
+
+        if (!success) { ModelState.AddModelError("", "Hubo un problema al eliminar el presupuesto. Por favor, intente nuevamente."); }
         return RedirectToAction("Index");
     }
 
@@ -58,34 +82,72 @@ public class PresupuestosController : Controller
         Presupuestos presupuestos = new Presupuestos();
         presupuestos.idPresupuesto = idPresupuesto;
         PresupuestosDetalles presupuestosDetalles = presupuestosRepository.GetPresupuestoDetalle(idPresupuesto, idProducto);
+
+        if (presupuestosDetalles == null) { return NotFound(); }
+
         presupuestos.Detalles.Add(presupuestosDetalles);
         return View(presupuestos);
     }
     [HttpPost]
     public IActionResult EditarPresupuestoDetalle(Presupuestos presupuesto)
     {
-        var success = presupuestosRepository.PutPresupuestoDetalle(presupuesto.idPresupuesto, presupuesto.Detalles[0].producto.idProducto, presupuesto.Detalles[0].Cantidad > 0 ? presupuesto.Detalles[0].Cantidad : 1);
-        return RedirectToAction("Index");
+        if (!ModelState.IsValid) { return View(presupuesto); }
+
+        var detalle = presupuesto.Detalles.FirstOrDefault();
+        if (detalle == null)
+        {
+            ModelState.AddModelError("", "Detalle de presupuesto no encontrado.");
+            return View(presupuesto);
+        }
+
+        var success = presupuestosRepository.PutPresupuestoDetalle(presupuesto.idPresupuesto, detalle.producto.idProducto, detalle.Cantidad > 0 ? detalle.Cantidad : 1);
+
+        if (success)
+        {
+            return RedirectToAction("Index");
+        }
+        else
+        {
+            ModelState.AddModelError("", "Hubo un problema al actualizar el detalle del presupuesto. Por favor, intente nuevamente.");
+            return View(presupuesto);
+        }
     }
 
     public IActionResult EliminarPresupuestoDetalle(int idPresupuesto, int idProducto)
     {
         var success = presupuestosRepository.DeletePresupuestoDetalle(idPresupuesto, idProducto);
+
+        if (!success) { ModelState.AddModelError("", "Hubo un problema al eliminar el detalle del presupuesto. Por favor, intente nuevamente."); }
         return RedirectToAction("Index");
     }
 
     [HttpGet]
     public IActionResult AgregarProducto()
     {
-        return View(productosRepository.GetProductos());
+        var productos = productosRepository.GetProductos();
+        return View(productos);
     }
     [HttpPost]
     public IActionResult AgregarProducto(int idPresupuesto, int idProducto, int Cantidad)
     {
-        PresupuestosDetalles presupuestoDetalle = new PresupuestosDetalles();
-        presupuestoDetalle.Cantidad = Cantidad;
-        presupuestoDetalle.producto = productosRepository.GetProducto(idProducto);
+        if (Cantidad <= 0) { Cantidad = 1; }
+
+        var producto = productosRepository.GetProducto(idProducto);
+        if (producto == null)
+        {
+            ModelState.AddModelError("", "Producto no encontrado.");
+            return RedirectToAction("Index");
+        }
+
+        PresupuestosDetalles presupuestoDetalle = new PresupuestosDetalles
+        {
+            Cantidad = Cantidad,
+            producto = producto
+        };
+
         var success = presupuestosRepository.PostPresupuestoDetalle(idPresupuesto, presupuestoDetalle);
+
+        if (!success) { ModelState.AddModelError("", "Hubo un problema al agregar el producto. Por favor, intente nuevamente."); }
         return RedirectToAction("Index");
     }
 }
