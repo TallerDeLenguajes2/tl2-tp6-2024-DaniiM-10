@@ -27,26 +27,57 @@ public class ProductosController : Controller
     [HttpPost]
     public IActionResult CrearProducto(Productos producto)
     {
+        if (!ModelState.IsValid) { return View(producto); }
+
         var success = productosRepository.PostProducto(producto);
-        return RedirectToAction("Index");
+        if (success)
+        { 
+            return RedirectToAction("Index");
+        }
+        else
+        {
+            ModelState.AddModelError("", "Hubo un problema al crear el producto. Por favor, intente nuevamente.");
+            return View(producto);
+        }
     }
+
 
     [HttpGet]
     public IActionResult EditarProducto(int idProducto)
     {
         Productos producto = productosRepository.GetProducto(idProducto);
+        if (producto == null) { return NotFound(); }
         return View(producto);
     }
     [HttpPost]
     public IActionResult EditarProducto(Productos producto)
     {
+        if (!ModelState.IsValid) { return View(producto); }
+
         var success = productosRepository.PutProducto(producto.idProducto, producto);
-        return RedirectToAction("Index");
+        if (success)
+        {
+            return RedirectToAction("Index");
+        }
+        else
+        {
+            ModelState.AddModelError("", "Hubo un problema al actualizar el producto. Por favor, intente nuevamente.");
+            return View(producto);
+        }
     }
 
     public IActionResult EliminarProducto(int idProducto)
     {
         var success = productosRepository.DeleteProducto(idProducto);
-        return RedirectToAction("Index");
+
+        if (success)
+        {
+            return RedirectToAction("Index");
+        }
+        else
+        {
+            ModelState.AddModelError("", "Hubo un problema al eliminar el producto. Por favor, intente nuevamente.");
+            return RedirectToAction("Index");
+        }
     }
 }

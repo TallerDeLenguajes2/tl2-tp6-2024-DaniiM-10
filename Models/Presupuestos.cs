@@ -7,17 +7,12 @@ public class Presupuestos {
         this.DetallesPrivate = new List<PresupuestosDetalles>();
     }
 
-    private int idPresupuestoPrivate;
-    public int idPresupuesto { get => idPresupuestoPrivate; }
+    public int idPresupuesto { get; set; }
     public string? NombreDestinatario { get; set; }
     public List<PresupuestosDetalles> Detalles { get => DetallesPrivate; }
     public DateTime FechaCreacion { get; set; }
 
     public void setDetallesPresupuesto(List<PresupuestosDetalles> pdList) {
         this.DetallesPrivate = pdList;
-    }
-
-    public void setIdPresupuesto(int idPr) {
-        this.idPresupuestoPrivate = idPr;
     }
 }

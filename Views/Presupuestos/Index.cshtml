@@ -1,8 +1,9 @@
 @using TP6.Models
-@model List<Presupuestos>;
+@model List<Presupuestos>
 
 @{
-    ViewData["Title"] = "Todos los presupuestos";
+    ViewData["Title"] = "Todos los Presupuestos";
+    int total = 0;
 }
 
 <h1>@ViewData["Title"]</h1>
@@ -13,6 +14,7 @@
             <th>Nombre Desti.</th>
             <th>Fecha Creac.</th>
             <th>Detalles</th>
+            <th>Agg. Producto</th>
             <th>Editar</th>
             <th>Eliminar</th>
         </tr>
@@ -29,7 +31,7 @@
                     </button>
 
                     <div class="modal fade" id="detailsModal-@presupuesto.idPresupuesto" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="detailsModalLabel-@presupuesto.idPresupuesto" aria-hidden="true">
-                        <div class="modal-dialog">
+                        <div class="modal-dialog modal-xl">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h5 class="modal-title" id="detailsModalLabel-@presupuesto.idPresupuesto">Detalles del presupuesto</h5>
@@ -43,25 +45,41 @@
                                                 <th>Precio C/Producto</th>
                                                 <th>Cantidad</th>
                                                 <th>Precio Total</th>
+                                                <th>Editar</th>
+                                                <th>Eliminar</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @if (presupuesto.Detalles != null && presupuesto.Detalles.Any())
                                             {
+                                                total = 0;
                                                 foreach (var detalle in presupuesto.Detalles)
                                                 {
                                                     <tr>
                                                         <td>@detalle.producto.Descripcion</td>
                                                         <td>$@detalle.producto.Precio</td>
-                                                        <td>@detalle.cantidad</td>
-                                                        <td>$@(detalle.producto.Precio * detalle.cantidad)</td>
+                                                        <td>@detalle.Cantidad</td>
+                                                        <td>$@(detalle.producto.Precio * detalle.Cantidad)</td>
+                                                        <td>
+                                                            <a class="btn btn-primary" asp-controller="Presupuestos" asp-action="EditarPresupuestoDetalle"
+                                                            asp-route-idPresupuesto="@presupuesto.idPresupuesto" asp-route-idProducto="@detalle.producto.idProducto">Editar</a>
+                                                        </td>
+                                                        <td>
+                                                            <a class="btn btn-danger" asp-controller="Presupuestos" asp-action="EliminarPresupuestoDetalle"
+                                                            asp-route-idPresupuesto="@presupuesto.idPresupuesto" asp-route-idProducto="@detalle.producto.idProducto"
+                                                            onclick="return confirm('¿Estas seguro que quieres eliminar el elemento?')">Eliminar</a>
+                                                        </td>
                                                     </tr>
+                                                    total += detalle.producto.Precio * detalle.Cantidad;
                                                 }
+                                                <tr>
+                                                    <td class="fw-bold">Total del Pedido: $@total</td>
+                                                </tr>
                                             }
                                             else
                                             {
                                                 <tr>
-                                                    <td colspan="4">No hay detalles disponibles.</td>
+                                                    <td colspan="6">No hay detalles disponibles.</td>
                                                 </tr>
                                             }
                                         </tbody>
@@ -72,13 +90,24 @@
                     </div>
                 </td>
                 <td>
-                    <a class="btn btn-primary" asp-controller="Presupuestos" asp-action="EditarPresupuesto"
-                    asp-route-idPresupuesto="@presupuesto.idPresupuesto">Editar</a>
+                    <a class="btn btn-primary" asp-controller="Presupuestos" asp-action="AgregarProducto"
+                       asp-route-idPresupuesto="@presupuesto.idPresupuesto">Agg Producto</a>
+                </td>
+                <td>
+                    @{
+                        if(presupuesto.Detalles == null || !presupuesto.Detalles.Any()){
+                            <button class="btn btn-primary disabled">Editar</button>
+                        } else {
+                            <a class="btn btn-primary"
+                            asp-controller="Presupuestos" asp-action="EditarPresupuesto"
+                            asp-route-idPresupuesto="@presupuesto.idPresupuesto">Editar</a>
+                        }
+                    }
                 </td>
                 <td>
                     <a class="btn btn-danger" asp-controller="Presupuestos" asp-action="EliminarPresupuesto"
-                    asp-route-idPresupuesto="@presupuesto.idPresupuesto"
-                    onclick="return confirm('¿Estas seguro que quieres eliminar el elemento?')">Eliminar</a>
+                       asp-route-idPresupuesto="@presupuesto.idPresupuesto"
+                       onclick="return confirm('¿Estas seguro que quieres eliminar el elemento?')">Eliminar</a>
                 </td>
             </tr>
         }

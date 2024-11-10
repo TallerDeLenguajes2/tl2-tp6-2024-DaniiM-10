@@ -2,8 +2,11 @@
 @model Presupuestos;
 
 @{
+    ViewData["Title"] = "Crear Presupuesto";
     Model.FechaCreacion = DateTime.Now; // Set the current date
 }
+
+<h1>@ViewData["Title"]</h1>
 
 <form asp-controller="Presupuestos" asp-action="CrearPresupuesto">
     <div class="form-group">
@@ -14,6 +17,6 @@
 
     <input type="hidden" asp-for="@Model.FechaCreacion" />
 
-    <button type="submit" class="btn btn-primary">Crear</button>
-    <a href="@Url.Action("Index")" class="btn btn-secondary">Cancelar</a>
+    <button type="submit" class="btn btn-primary mt-3">Crear</button>
+    <a href="@Url.Action("Index")" class="btn btn-secondary mt-3">Cancelar</a>
 </form>

@@ -1,6 +1,12 @@
 @using TP6.Models
 @model Productos
 
+@{
+    ViewData["Title"] = "Editar Producto";
+}
+
+<h1>@ViewData["Title"]</h1>
+
 <form asp-controller="Productos" asp-action="EditarProducto">
     <input asp-for="idProducto" type="hidden" class="form-control" value="@Model.idProducto" />
     <div class="form-group">
@@ -14,6 +20,6 @@
         <span asp-validation-for="Precio" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary">Editar</button>
-    <a href="@Url.Action("Index")" class="btn btn-secondary">Cancelar</a>
+    <button type="submit" class="btn btn-primary mt-3">Editar</button>
+    <a href="@Url.Action("Index")" class="btn btn-secondary mt-3">Cancelar</a>
 </form>

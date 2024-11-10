@@ -1,0 +1,50 @@
+@using TP6.Models
+@model List<Productos>;
+
+@{
+    int idPresupuesto = 0;
+    if (int.TryParse(Context.Request.Query["idPresupuesto"], out int parsedId))
+    {
+        idPresupuesto = parsedId;
+    }
+    else
+    {
+        // Manejo de error si `id` no es un número válido o no está en la URL
+        <p>ID no válido o no especificado en la URL.</p>
+    }
+    DateTime fechaHoy = DateTime.Now;
+    ViewData["Title"] = "Todos los Productos";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Precio</th>
+            <th>Agregar Producto</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var producto in Model)
+        {
+            <tr>
+                <td>@producto.Descripcion</td>
+                <td>$@producto.Precio</td>
+                <td>
+                    <form asp-controller="Presupuestos" asp-action="AgregarProducto" class="d-flex align-items-center">
+                        <input asp-for="@idPresupuesto" type="hidden" value="@idPresupuesto" />
+                        <input name="idProducto" type="hidden" value="@producto.idProducto" />
+
+                        <label for="Cantidad" class="me-2">Cantidad</label>
+                        <input name="Cantidad" class="form-control form-control-sm me-2" style="width: 5rem;" />
+
+                        <button type="submit" class="btn btn-primary">Agregar</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+

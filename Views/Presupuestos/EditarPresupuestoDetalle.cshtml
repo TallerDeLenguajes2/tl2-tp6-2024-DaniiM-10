@@ -1,0 +1,27 @@
+@using TP6.Models
+@model Presupuestos
+
+@{
+    ViewData["Title"] = "Editar Presupuesto Detalle";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form asp-controller="Presupuestos" asp-action="EditarPresupuestoDetalle">
+    <input asp-for="idPresupuesto" type="hidden" class="form-control" value="@Model.idPresupuesto" />
+    <input asp-for="@Model.Detalles[0].producto.idProducto" type="hidden" class="form-control" value="@Model.Detalles[0].producto.idProducto" />
+
+    <input type="hidden" name="NombreDestinatario" value="@Model.NombreDestinatario" />
+    <input type="hidden" name="FechaCreacion" value="@Model.FechaCreacion" />
+    <input type="hidden" name="Precio" value="@Model.Detalles[0].producto.Precio" />
+    <input type="hidden" name="Descripcion" value="@Model.Detalles[0].producto.Descripcion" />
+
+    <div class="form-group">
+        <label asp-for="Detalles[0].Cantidad" class="control-label"></label>
+        <input asp-for="Detalles[0].Cantidad" class="form-control" />
+        <span asp-validation-for="Detalles[0].Cantidad" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Editar</button>
+    <a href="@Url.Action("Index")" class="btn btn-secondary mt-3">Cancelar</a>
+</form>

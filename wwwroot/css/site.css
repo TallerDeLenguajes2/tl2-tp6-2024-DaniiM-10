@@ -20,3 +20,9 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+/* Subrayado con color negro en hover */
+.hover-underline:hover {
+  text-decoration: underline;
+  text-decoration-color: black; /* Establece el color del subrayado a negro */
+}
