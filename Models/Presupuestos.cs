@@ -1,18 +1,20 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace TP6.Models;
 
-public class Presupuestos {
-    private List<PresupuestosDetalles> DetallesPrivate;
+public class Presupuestos
+{
+    [Key]
+    public int IdPresupuesto { get; set; }
 
-    public Presupuestos() {
-        this.DetallesPrivate = new List<PresupuestosDetalles>();
-    }
+    [Required]
+    [StringLength(100)]
+    public string NombreDestinatario { get; set; }
 
-    public int idPresupuesto { get; set; }
-    public string? NombreDestinatario { get; set; }
-    public List<PresupuestosDetalles> Detalles { get => DetallesPrivate; }
+    [Required]
     public DateTime FechaCreacion { get; set; }
+    
+    public List<PresupuestosDetalles> Detalles { get; set; } = new List<PresupuestosDetalles>();
 
-    public void setDetallesPresupuesto(List<PresupuestosDetalles> pdList) {
-        this.DetallesPrivate = pdList;
-    }
+    public Presupuestos() {}
 }

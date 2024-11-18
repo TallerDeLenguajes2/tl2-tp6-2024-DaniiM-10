@@ -26,15 +26,15 @@
                 <td>@presupuesto.NombreDestinatario</td>
                 <td>@presupuesto.FechaCreacion</td>
                 <td>
-                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#detailsModal-@presupuesto.idPresupuesto">
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#detailsModal-@presupuesto.IdPresupuesto">
                         Detalles
                     </button>
 
-                    <div class="modal fade" id="detailsModal-@presupuesto.idPresupuesto" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="detailsModalLabel-@presupuesto.idPresupuesto" aria-hidden="true">
+                    <div class="modal fade" id="detailsModal-@presupuesto.IdPresupuesto" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="detailsModalLabel-@presupuesto.IdPresupuesto" aria-hidden="true">
                         <div class="modal-dialog modal-xl">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="detailsModalLabel-@presupuesto.idPresupuesto">Detalles del presupuesto</h5>
+                                    <h5 class="modal-title" id="detailsModalLabel-@presupuesto.IdPresupuesto">Detalles del presupuesto</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
@@ -62,11 +62,11 @@
                                                         <td>$@(detalle.producto.Precio * detalle.Cantidad)</td>
                                                         <td>
                                                             <a class="btn btn-primary" asp-controller="Presupuestos" asp-action="EditarPresupuestoDetalle"
-                                                            asp-route-idPresupuesto="@presupuesto.idPresupuesto" asp-route-idProducto="@detalle.producto.idProducto">Editar</a>
+                                                            asp-route-IdPresupuesto="@presupuesto.IdPresupuesto" asp-route-IdProducto="@detalle.producto.IdProducto">Editar</a>
                                                         </td>
                                                         <td>
                                                             <a class="btn btn-danger" asp-controller="Presupuestos" asp-action="EliminarPresupuestoDetalle"
-                                                            asp-route-idPresupuesto="@presupuesto.idPresupuesto" asp-route-idProducto="@detalle.producto.idProducto"
+                                                            asp-route-IdPresupuesto="@presupuesto.IdPresupuesto" asp-route-IdProducto="@detalle.producto.IdProducto"
                                                             onclick="return confirm('¿Estas seguro que quieres eliminar el elemento?')">Eliminar</a>
                                                         </td>
                                                     </tr>
@@ -91,7 +91,7 @@
                 </td>
                 <td>
                     <a class="btn btn-primary" asp-controller="Presupuestos" asp-action="AgregarProducto"
-                       asp-route-idPresupuesto="@presupuesto.idPresupuesto">Agg Producto</a>
+                       asp-route-IdPresupuesto="@presupuesto.IdPresupuesto">Agg Producto</a>
                 </td>
                 <td>
                     @{
@@ -100,13 +100,13 @@
                         } else {
                             <a class="btn btn-primary"
                             asp-controller="Presupuestos" asp-action="EditarPresupuesto"
-                            asp-route-idPresupuesto="@presupuesto.idPresupuesto">Editar</a>
+                            asp-route-IdPresupuesto="@presupuesto.IdPresupuesto">Editar</a>
                         }
                     }
                 </td>
                 <td>
                     <a class="btn btn-danger" asp-controller="Presupuestos" asp-action="EliminarPresupuesto"
-                       asp-route-idPresupuesto="@presupuesto.idPresupuesto"
+                       asp-route-IdPresupuesto="@presupuesto.IdPresupuesto"
                        onclick="return confirm('¿Estas seguro que quieres eliminar el elemento?')">Eliminar</a>
                 </td>
             </tr>

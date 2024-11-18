@@ -8,7 +8,7 @@
 <h1>@ViewData["Title"]</h1>
 
 <form asp-controller="Productos" asp-action="EditarProducto">
-    <input asp-for="idProducto" type="hidden" class="form-control" value="@Model.idProducto" />
+    <input asp-for="@Model.IdProducto" type="hidden" class="form-control" value="@Model.IdProducto" />
     <div class="form-group">
         <label asp-for="Descripcion" class="control-label"></label>
         <input asp-for="Descripcion" class="form-control" value="@Model.Descripcion" />

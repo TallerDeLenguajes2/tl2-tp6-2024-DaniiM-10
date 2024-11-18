@@ -24,7 +24,7 @@ public class ProductosRepository
                     while (reader.Read())
                     {
                         Productos producto = new Productos();
-                        producto.idProducto = (Convert.ToInt32(reader["idProducto"]));
+                        producto.IdProducto = (Convert.ToInt32(reader["idProducto"]));
                         producto.Descripcion = reader["Descripcion"].ToString();
                         producto.Precio = Convert.ToInt32(reader["Precio"]);
                         productos.Add(producto);
@@ -64,7 +64,7 @@ public class ProductosRepository
         }
     }
 
-    public bool PutProducto(int idProducto, Productos producto)
+    public bool PutProducto(int IdProducto, Productos producto)
     {
         string queryString = @"UPDATE Productos SET Descripcion = @Descripcion, Precio = @Precio 
         WHERE idProducto = @IdP;";
@@ -76,7 +76,7 @@ public class ProductosRepository
                 SqliteCommand command = new SqliteCommand(queryString, connection);
                 command.Parameters.AddWithValue("@Descripcion", producto.Descripcion);
                 command.Parameters.AddWithValue("@Precio", producto.Precio);
-                command.Parameters.AddWithValue("@IdP", idProducto);
+                command.Parameters.AddWithValue("@IdP", IdProducto);
 
                 connection.Open();
                 int rowsAffected = command.ExecuteNonQuery(); // Obtiene el número de filas afectadas
@@ -92,7 +92,7 @@ public class ProductosRepository
         }
     }
 
-    public Productos GetProducto(int idProducto)
+    public Productos GetProducto(int IdProducto)
     {
         try
         {
@@ -102,7 +102,7 @@ public class ProductosRepository
                 WHERE idProducto = @IdP;";
 
                 SqliteCommand command = new SqliteCommand(queryString, connection);
-                command.Parameters.AddWithValue("@IdP", idProducto);
+                command.Parameters.AddWithValue("@IdP", IdProducto);
 
                 connection.Open();
 
@@ -111,7 +111,7 @@ public class ProductosRepository
                     if (reader.Read())
                     {
                         Productos producto = new Productos();
-                        producto.idProducto = (Convert.ToInt32(reader["idProducto"]));
+                        producto.IdProducto = (Convert.ToInt32(reader["idProducto"]));
                         producto.Descripcion = reader["Descripcion"].ToString();
                         producto.Precio = Convert.ToInt32(reader["Precio"]);
                         return producto;
@@ -127,9 +127,9 @@ public class ProductosRepository
         return null;
     }
 
-    public bool DeleteProducto(int idProducto)
+    public bool DeleteProducto(int IdProducto)
     {
-        var producto = GetProducto(idProducto);
+        var producto = GetProducto(IdProducto);
 
         if (producto != null) 
         {
@@ -145,13 +145,13 @@ public class ProductosRepository
 
                         using (SqliteCommand deleteCommand = new SqliteCommand(queryString, connection, transaction))
                         {
-                            deleteCommand.Parameters.AddWithValue("@IdP", idProducto);
+                            deleteCommand.Parameters.AddWithValue("@IdP", IdProducto);
                             deleteCommand.ExecuteNonQuery();
                         }
 
                         using (SqliteCommand deleteCommand1 = new SqliteCommand(queryString1, connection, transaction))
                         {
-                            deleteCommand1.Parameters.AddWithValue("@IdPr", idProducto);
+                            deleteCommand1.Parameters.AddWithValue("@IdPr", IdProducto);
                             int rowsAffected = deleteCommand1.ExecuteNonQuery();
 
                             if (rowsAffected > 0)

@@ -24,11 +24,11 @@
                 <td>$@producto.Precio</td>
                 <td>
                     <a class="btn btn-primary" asp-controller="Productos" asp-action="EditarProducto"
-                    asp-route-idProducto="@producto.idProducto">Editar</a>
+                    asp-route-IdProducto="@producto.IdProducto">Editar</a>
                 </td>
                 <td>
                     <a class="btn btn-danger" asp-controller="Productos" asp-action="EliminarProducto"
-                    asp-route-idProducto="@producto.idProducto"
+                    asp-route-IdProducto="@producto.IdProducto"
                     onclick="return confirm('¿Estas seguro que quieres eliminar el elemento?')">Eliminar</a>
                 </td>
             </tr>

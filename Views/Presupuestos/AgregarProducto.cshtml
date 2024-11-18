@@ -2,10 +2,10 @@
 @model List<Productos>;
 
 @{
-    int idPresupuesto = 0;
+    int IdPresupuesto = 0;
     if (int.TryParse(Context.Request.Query["idPresupuesto"], out int parsedId))
     {
-        idPresupuesto = parsedId;
+        IdPresupuesto = parsedId;
     }
     else
     {
@@ -34,8 +34,8 @@
                 <td>$@producto.Precio</td>
                 <td>
                     <form asp-controller="Presupuestos" asp-action="AgregarProducto" class="d-flex align-items-center">
-                        <input asp-for="@idPresupuesto" type="hidden" value="@idPresupuesto" />
-                        <input name="idProducto" type="hidden" value="@producto.idProducto" />
+                        <input asp-for="@IdPresupuesto" type="hidden" value="@IdPresupuesto" />
+                        <input name="IdProducto" type="hidden" value="@producto.IdProducto" />
 
                         <label for="Cantidad" class="me-2">Cantidad</label>
                         <input name="Cantidad" class="form-control form-control-sm me-2" style="width: 5rem;" />

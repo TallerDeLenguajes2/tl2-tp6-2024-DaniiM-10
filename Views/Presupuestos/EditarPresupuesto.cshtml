@@ -8,10 +8,10 @@
 <h1>@ViewData["Title"]</h1>
 
 <form asp-controller="Presupuestos" asp-action="EditarPresupuesto">
-    <input asp-for="@Model.idPresupuesto" type="hidden" class="form-control" value="@Model.idPresupuesto" />
+    <input asp-for="@Model.IdPresupuesto" type="hidden" class="form-control" value="@Model.IdPresupuesto" />
 
     <input type="hidden" name="Cantidad" value="@Model.Detalles[0].Cantidad" />
-    <input type="hidden" name="idProducto" value="@Model.Detalles[0].producto.idProducto" />
+    <input type="hidden" name="IdProducto" value="@Model.Detalles[0].producto.IdProducto" />
     <input type="hidden" name="Descripcion" value="@Model.Detalles[0].producto.Descripcion" />
     <input type="hidden" name="Precio" value="@Model.Detalles[0].producto.Precio" />
     <input type="hidden" name="FechaCreacion" value="@Model.FechaCreacion" />
