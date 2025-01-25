@@ -8,8 +8,7 @@ public class Presupuestos
     public int IdPresupuesto { get; set; }
 
     [Required]
-    [StringLength(100)]
-    public string NombreDestinatario { get; set; }
+    public Clientes Cliente { get; set; } = new Clientes();
 
     [Required]
     public DateTime FechaCreacion { get; set; }
