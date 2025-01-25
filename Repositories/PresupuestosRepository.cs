@@ -5,9 +5,11 @@ public class PresupuestosRepository
 {
     private string ConnectionString = @"Data Source=db/Tienda.db;Cache=Shared";
     private ProductosRepository productosRepository;
+    private ClientesRepository clientesRepository;
 
     public PresupuestosRepository() {
         productosRepository = new ProductosRepository();
+        clientesRepository = new ClientesRepository();
     }
 
     public List<Presupuestos> GetPresupuestos() {
@@ -27,7 +29,7 @@ public class PresupuestosRepository
                     {
                         Presupuestos presupuesto = new Presupuestos();
                         presupuesto.IdPresupuesto = Convert.ToInt32(reader["idPresupuesto"]);
-                        presupuesto.NombreDestinatario = reader["NombreDestinatario"].ToString();
+                        presupuesto.Cliente = clientesRepository.GetCliente(Convert.ToInt32(reader["ClienteId"]));
                         presupuesto.FechaCreacion = Convert.ToDateTime(reader["FechaCreacion"]);
 
                         presupuesto.Detalles = GetPresupuestosDetalles(Convert.ToInt32(reader["idPresupuesto"]));
@@ -64,7 +66,7 @@ public class PresupuestosRepository
                         if (reader.Read()) {
                             presupuesto = new Presupuestos();
                             presupuesto.IdPresupuesto = Convert.ToInt32(reader["idPresupuesto"]);
-                            presupuesto.NombreDestinatario = reader["NombreDestinatario"].ToString();
+                            presupuesto.Cliente = clientesRepository.GetCliente(Convert.ToInt32(reader["ClienteId"]));
                             presupuesto.FechaCreacion = Convert.ToDateTime(reader["FechaCreacion"]);
 
                             presupuesto.Detalles = GetPresupuestosDetalles(Convert.ToInt32(reader["idPresupuesto"]));
@@ -88,12 +90,12 @@ public class PresupuestosRepository
                 connection.Open();
                 using (var transaction = connection.BeginTransaction())
                 {
-                    string queryString = @"INSERT INTO Presupuestos (NombreDestinatario, FechaCreacion) 
-                                        VALUES (@NombreDestinatario, @FechaCreacion);
+                    string queryString = @"INSERT INTO Presupuestos (FechaCreacion, ClienteId) 
+                                        VALUES (@FechaCreacion, @ClienteId);
                                         SELECT last_insert_rowid();";
                     using (SqliteCommand command = new SqliteCommand(queryString, connection, transaction))
                     {
-                        command.Parameters.AddWithValue("@NombreDestinatario", presupuesto.NombreDestinatario);
+                        command.Parameters.AddWithValue("@ClienteId", presupuesto.Cliente.ClienteId);
                         command.Parameters.AddWithValue("@FechaCreacion", presupuesto.FechaCreacion);
                         command.ExecuteNonQuery();
                     }
@@ -196,7 +198,7 @@ public class PresupuestosRepository
 
     // TP6
     public bool PutPresupuesto(Presupuestos presupuesto) {
-        string queryString = @"UPDATE Presupuestos SET NombreDestinatario = @NombreD
+        string queryString = @"UPDATE Presupuestos SET ClienteId = @ClienteId
         WHERE idPresupuesto = @IdP";
 
         try
@@ -204,8 +206,7 @@ public class PresupuestosRepository
             using (SqliteConnection connection = new SqliteConnection(ConnectionString))
             {
                 SqliteCommand command = new SqliteCommand(queryString, connection);
-                command.Parameters.AddWithValue("@NombreD", presupuesto.NombreDestinatario);
-                command.Parameters.AddWithValue("@IdP", presupuesto.IdPresupuesto);
+                command.Parameters.AddWithValue("@ClienteId", presupuesto.Cliente.ClienteId);
 
                 connection.Open();
                 int rowsAffected = command.ExecuteNonQuery(); // Obtiene el número de filas afectadas
@@ -365,5 +366,29 @@ public class PresupuestosRepository
             Console.WriteLine($"Error al obtener detalles de presupuesto: {ex.Message}");
         }
         return pdList;
+    }
+
+    public int GetIdPresupuesto(int ClienteId) {
+        try
+        {
+            string queryString = @"SELECT idPresupuesto FROM Presupuestos WHERE idCliente = @idCliente LIMIT 1;";
+            
+            using (var connection = new SqliteConnection(ConnectionString))
+            {
+                connection.Open();
+                using (var command = new SqliteCommand(queryString, connection))
+                {
+                    command.Parameters.AddWithValue("@idCliente", ClienteId);
+
+                    var result = command.ExecuteScalar();
+                    return Convert.ToInt32(result);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al obtener el id del presupuesto: {ex.Message}");
+            return 0;
+        }
     }
 }
