@@ -23,7 +23,7 @@
         @foreach (var presupuesto in Model)
         {
             <tr>
-                <td>@presupuesto.NombreDestinatario</td>
+                <td>@presupuesto.Cliente.Nombre</td>
                 <td>@presupuesto.FechaCreacion</td>
                 <td>
                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#detailsModal-@presupuesto.IdPresupuesto">

@@ -16,11 +16,11 @@
     <input type="hidden" name="Precio" value="@Model.Detalles[0].producto.Precio" />
     <input type="hidden" name="FechaCreacion" value="@Model.FechaCreacion" />
 
-    <div class="form-group">
-        <label asp-for="@Model.NombreDestinatario" class="control-label"></label>
-        <input asp-for="@Model.NombreDestinatario" class="form-control" />
-        <span asp-validation-for="@Model.NombreDestinatario" class="text-danger"></span>
-    </div>
+    <!--<div class="form-group">
+        <label asp-for="Model.NombreDestinatario" class="control-label"></label>
+        <input asp-for="Model.NombreDestinatario*/" class="form-control" />
+        <span asp-validation-for="Model.NombreDestinatario" class="text-danger"></span>
+    </div>-->
 
     <button type="submit" class="btn btn-primary mt-3">Editar</button>
     <a href="@Url.Action("Index")" class="btn btn-secondary mt-3">Cancelar</a>

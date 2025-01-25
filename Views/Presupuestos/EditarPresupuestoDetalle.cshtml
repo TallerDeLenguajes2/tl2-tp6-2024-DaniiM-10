@@ -11,7 +11,7 @@
     <input asp-for="@Model.IdPresupuesto" type="hidden" class="form-control" value="@Model.IdPresupuesto" />
     <input asp-for="@Model.Detalles[0].producto.IdProducto" type="hidden" class="form-control" value="@Model.Detalles[0].producto.IdProducto" />
 
-    <input type="hidden" name="NombreDestinatario" value="@Model.NombreDestinatario" />
+    <!--<input type="hidden" name="NombreDestinatario" value="Model.NombreDestinatario" />-->
     <input type="hidden" name="FechaCreacion" value="@Model.FechaCreacion" />
     <input type="hidden" name="Precio" value="@Model.Detalles[0].producto.Precio" />
     <input type="hidden" name="Descripcion" value="@Model.Detalles[0].producto.Descripcion" />
