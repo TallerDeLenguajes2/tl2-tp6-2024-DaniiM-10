@@ -5,7 +5,6 @@ using TP6.Models;
 using TP7.ViewModels;
 namespace TP6.Controllers;
 
-
 //[Authorize]
 public class ClientesController : Controller
 {

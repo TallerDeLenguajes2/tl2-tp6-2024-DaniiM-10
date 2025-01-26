@@ -5,7 +5,6 @@ using TP6.Models;
 using TP7.ViewModels;
 namespace TP6.Controllers;
 
-
 public class PresupuestosController : Controller
 {
 
@@ -329,26 +328,25 @@ public IActionResult EliminarPresupuesto(int id)
 [HttpGet]
 public IActionResult EliminarPresupuestoPorId(int id)
 {
-    try
+try
+{
+    if (string.IsNullOrEmpty(HttpContext.Session.GetString("User"))) 
+        return RedirectToAction("Index", "Login");
+
+    if (HttpContext.Session.GetString("AccessLevel") != "Admin")
     {
-        if (string.IsNullOrEmpty(HttpContext.Session.GetString("User"))) 
-            return RedirectToAction("Index", "Login");
-
-        if (HttpContext.Session.GetString("AccessLevel") != "Admin")
-        {
-            TempData["ErrorMessage"] = "No tienes permisos para realizar esta acción.";
-            return RedirectToAction("Index");
-        }
-
-        repoPresupuestos.EliminarPresupuestoPorId(id);
+        TempData["ErrorMessage"] = "No tienes permisos para realizar esta acción.";
         return RedirectToAction("Index");
     }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex.ToString());
-        ViewBag.ErrorMessage = "No se pudo eliminar el presupuesto.";
-        return RedirectToAction("Index");
-    }
+
+    repoPresupuestos.EliminarPresupuestoPorId(id);
+    return RedirectToAction("Index");
 }
-
+catch (Exception ex)
+{
+    _logger.LogError(ex.ToString());
+    ViewBag.ErrorMessage = "No se pudo eliminar el presupuesto.";
+    return RedirectToAction("Index");
+}
+}
 }
