@@ -1,16 +1,17 @@
-@using TP7.ViewModels;
-@model AgregarProductoAPresupuestoViewModel;
+@using TP7.ViewModels
+@model AgregarProductoAPresuViewModel
 
-@{
-    DateTime fechaHoy = DateTime.Now;
-    ViewData["Title"] = "Todos los Productos";
+@if (ViewBag.ErrorMessage != null)
+{
+        <div class="error-message">
+            <p>@ViewBag.ErrorMessage</p>
+        </div>
 }
-
-<h1>@ViewData["Title"]</h1>
 
 <form asp-controller="Presupuestos" asp-action="AgregarProductoEnPresupuesto" method="post" class="container mt-4">
 
     <input type="hidden" name="idPresupuesto" value="@Model.IdPresupuesto" />
+    
     <div class="mb-3">
         <label for="IdProducto" class="form-label">Producto</label>
         <select name="IdProducto" class="form-control" required>
@@ -22,6 +23,7 @@
         </select>
         <span asp-validation-for="IdProducto" class="text-danger"></span>
     </div>
+
     <div class="form-group">
         <label for="Cantidad" class="form-label">Cantidad</label>
         <input name="Cantidad" class="form-control" type="number" required min="1" />
@@ -31,3 +33,5 @@
     <button type="submit" class="btn btn-primary mt-2">Agregar Producto</button>
 </form>
 
+
+@section Scripts{<partial name="_ValidationScriptsPartial"/>}

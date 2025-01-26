@@ -1,22 +1,36 @@
 @using TP6.Models
-@model List<Presupuestos>
+@model List<Presupuesto>
 
-@{
-    ViewData["Title"] = "Todos los Presupuestos";
-    int total = 0;
+@if (ViewBag.ErrorMessage != null)
+{
+        <div class="error-message">
+            <p>@ViewBag.ErrorMessage</p>
+        </div>
 }
 
-<h1>@ViewData["Title"]</h1>
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger" role="alert">
+        @TempData["ErrorMessage"]
+    </div>
+}
 
-<table class="table">
+<h2>Presupuestos</h2>
+
+<div class="text-center">
+    @if ((bool)ViewData["EsAdmin"])
+    {
+        <a asp-controller="Presupuestos" asp-action="AltaPresupuesto" class="btn btn-success mb-2">Alta presupuesto</a>
+    }
+</div>
+
+
+<table class="table table-bordered text-light">
     <thead>
         <tr>
-            <th>Nombre Desti.</th>
-            <th>Fecha Creac.</th>
-            <th>Detalles</th>
-            <th>Agg. Producto</th>
-            <th>Editar</th>
-            <th>Eliminar</th>
+            <th>Destinatario</th>
+            <th>Fecha de Creacion</th>
+            <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
@@ -24,92 +38,21 @@
         {
             <tr>
                 <td>@presupuesto.Cliente.Nombre</td>
-                <td>@presupuesto.FechaCreacion</td>
+                <td>@presupuesto.FechaCreacion.ToShortDateString()</td>
                 <td>
-                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#detailsModal-@presupuesto.IdPresupuesto">
-                        Detalles
-                    </button>
-
-                    <div class="modal fade" id="detailsModal-@presupuesto.IdPresupuesto" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="detailsModalLabel-@presupuesto.IdPresupuesto" aria-hidden="true">
-                        <div class="modal-dialog modal-xl">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="detailsModalLabel-@presupuesto.IdPresupuesto">Detalles del presupuesto</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <table class="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Nombre</th>
-                                                <th>Precio C/Producto</th>
-                                                <th>Cantidad</th>
-                                                <th>Precio Total</th>
-                                                <th>Editar</th>
-                                                <th>Eliminar</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @if (presupuesto.Detalles != null && presupuesto.Detalles.Any())
-                                            {
-                                                total = 0;
-                                                foreach (var detalle in presupuesto.Detalles)
-                                                {
-                                                    <tr>
-                                                        <td>@detalle.producto.Descripcion</td>
-                                                        <td>$@detalle.producto.Precio</td>
-                                                        <td>@detalle.Cantidad</td>
-                                                        <td>$@(detalle.producto.Precio * detalle.Cantidad)</td>
-                                                        <td>
-                                                            <a class="btn btn-primary" asp-controller="Presupuestos" asp-action="EditarPresupuestoDetalle"
-                                                            asp-route-IdPresupuesto="@presupuesto.IdPresupuesto" asp-route-IdProducto="@detalle.producto.IdProducto">Editar</a>
-                                                        </td>
-                                                        <td>
-                                                            <a class="btn btn-danger" asp-controller="Presupuestos" asp-action="EliminarPresupuestoDetalle"
-                                                            asp-route-IdPresupuesto="@presupuesto.IdPresupuesto" asp-route-IdProducto="@detalle.producto.IdProducto"
-                                                            onclick="return confirm('¿Estas seguro que quieres eliminar el elemento?')">Eliminar</a>
-                                                        </td>
-                                                    </tr>
-                                                    total += detalle.producto.Precio * detalle.Cantidad;
-                                                }
-                                                <tr>
-                                                    <td class="fw-bold">Total del Pedido: $@total</td>
-                                                </tr>
-                                            }
-                                            else
-                                            {
-                                                <tr>
-                                                    <td colspan="6">No hay detalles disponibles.</td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <a class="btn btn-primary" asp-controller="Presupuestos" asp-action="AgregarProducto"
-                       asp-route-IdPresupuesto="@presupuesto.IdPresupuesto">Agg Producto</a>
-                </td>
-                <td>
-                    @{
-                        if(presupuesto.Detalles == null || !presupuesto.Detalles.Any()){
-                            <button class="btn btn-primary disabled">Editar</button>
-                        } else {
-                            <a class="btn btn-primary"
-                            asp-controller="Presupuestos" asp-action="EditarPresupuesto"
-                            asp-route-IdPresupuesto="@presupuesto.IdPresupuesto">Editar</a>
-                        }
+                    <a asp-controller="Presupuestos" asp-action="DetallesDelPresupuesto" asp-route-id="@presupuesto.IdPresupuesto" class="btn btn-info">Detalles</a>
+                    @if ((bool)ViewData["EsAdmin"])
+                    {
+                        <a asp-controller="Presupuestos" asp-action="AgregarProductoAPresupuesto" asp-route-id="@presupuesto.IdPresupuesto" class="btn btn-success">Agregar Producto</a>
+                        <a asp-controller="Presupuestos" asp-action="EliminarProductoAPresupuesto" asp-route-id="@presupuesto.IdPresupuesto" class="btn btn-danger">Eliminar Producto</a>
+                        <a asp-controller="Presupuestos" asp-action="ModificarPresupuesto" asp-route-id="@presupuesto.IdPresupuesto" class="btn btn-warning">Editar</a>
+                        <a asp-controller="Presupuestos" asp-action="EliminarPresupuesto" asp-route-id="@presupuesto.IdPresupuesto" class="btn btn-danger">Eliminar</a>
+                        
                     }
-                </td>
-                <td>
-                    <a class="btn btn-danger" asp-controller="Presupuestos" asp-action="EliminarPresupuesto"
-                       asp-route-IdPresupuesto="@presupuesto.IdPresupuesto"
-                       onclick="return confirm('¿Estas seguro que quieres eliminar el elemento?')">Eliminar</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+

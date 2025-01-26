@@ -1,183 +1,133 @@
+using System.Threading.Channels;
 using Microsoft.Data.Sqlite;
-namespace TP6.Models;
+using TP6.Models;
+using TP7.ViewModels;
 
-public class ClientesRepository 
+public class ClientesRepository : IClientesRepository
 {
-    private string ConnectionString = @"Data Source=db/Tienda.db;Cache=Shared";
-    private PresupuestosRepository presupuestosRepository;
-    public ClientesRepository() {
-        presupuestosRepository = new PresupuestosRepository();
+    private readonly ILogger<ClientesRepository> _logger;
+    private readonly string connectionString;
+
+    public ClientesRepository(string CadenaDeConexion)
+    {
+        connectionString = CadenaDeConexion;
     }
 
-    public List<Clientes> GetClientes()
+    public void CrearCliente(Cliente cliente)
     {
-        List<Clientes> clientes = new List<Clientes>();
-
         try
         {
-            using (SqliteConnection connection = new SqliteConnection(ConnectionString))
-            {
-                string queryString = @"SELECT * FROM Clientes;";
+            string query = @"INSERT INTO Cliente (Nombre, Email, Telefono) VALUES (@nombre, @email, @telefono);";
 
-                SqliteCommand command = new SqliteCommand(queryString, connection);
+            using (SqliteConnection connection = new SqliteConnection(connectionString))
+            {
                 connection.Open();
-                using (SqliteDataReader reader = command.ExecuteReader())
+                SqliteCommand command = new SqliteCommand(query, connection);
+                command.Parameters.AddWithValue("@nombre", cliente.Nombre);
+                command.Parameters.AddWithValue("@email", cliente.Email);
+                command.Parameters.AddWithValue("@telefono", cliente.Telefono);
+                command.ExecuteNonQuery();
+                connection.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
+            throw new Exception();
+        }
+    }
+
+    public List<Cliente> ObtenerClientes()
+    {
+        List<Cliente> clientes = new List<Cliente>();
+
+        string query = "SELECT * FROM Cliente";
+
+        using (SqliteConnection connection = new SqliteConnection(connectionString))
+        {
+            connection.Open();
+            SqliteCommand command = new SqliteCommand(query, connection);
+
+            using (SqliteDataReader reader = command.ExecuteReader())
+            {
+                if (reader.HasRows)
                 {
                     while (reader.Read())
                     {
-                        Clientes cliente = new Clientes();
-                        cliente.ClienteId = Convert.ToInt32(reader["ClienteId"]);
-                        cliente.Nombre = reader["Nombre"].ToString()!;
-                        cliente.Email = reader["Email"].ToString()!;
-                        cliente.Telefono = reader["Telefono"].ToString()!;
-                        clientes.Add(cliente);
+                        Cliente nuevoCliente = new Cliente();
+                        nuevoCliente.ClienteId = Convert.ToInt32(reader["ClienteId"]);
+                        nuevoCliente.Nombre = reader["Nombre"].ToString();
+                        nuevoCliente.Email = reader["Email"].ToString();
+                        nuevoCliente.Telefono = reader["Telefono"].ToString();
+                        clientes.Add(nuevoCliente);
                     }
                 }
-            }    
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error en GetClientes: {ex.Message}");
-        }
 
+            }
+            connection.Close();
+        }
         return clientes;
     }
 
-    public bool PostCliente(Clientes cliente)
+    public void ModificarCliente(Cliente cliente)
     {
-        string queryString = @"INSERT INTO Clientes (Nombre, Email, Telefono) 
-        VALUES (@Nombre, @Email, @Telefono);";
+        string query = @"UPDATE Cliente SET Nombre = @nombre, Email = @email, Telefono = @telefono WHERE ClienteId = @Id;";
 
-        try
+        using (SqliteConnection connection = new SqliteConnection(connectionString))
         {
-            using (SqliteConnection connection = new SqliteConnection(ConnectionString))
-            {
-                connection.Open();
-                SqliteCommand command = new SqliteCommand(queryString, connection);
-                command.Parameters.AddWithValue("@Nombre", cliente.Nombre);
-                command.Parameters.AddWithValue("@Email", cliente.Email);
-                command.Parameters.AddWithValue("@Telefono", cliente.Telefono);
-                command.ExecuteNonQuery();
-            }
-            return true;
+            connection.Open();
+            SqliteCommand command = new SqliteCommand(query, connection);
+            command.Parameters.AddWithValue("@nombre", cliente.Nombre);
+            command.Parameters.AddWithValue("@email", cliente.Email);
+            command.Parameters.AddWithValue("@telefono", cliente.Telefono);
+            command.Parameters.AddWithValue("@Id", cliente.ClienteId);
+            command.ExecuteNonQuery();
+            connection.Close();
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error en PostCliente: {ex.Message}");
-            return false;
-        }
+
     }
 
-    public bool PutCliente(Clientes cliente)
+    public Cliente ObtenerCliente(int id)
     {
-        string queryString = @"UPDATE Clientes SET Nombre = @Nombre, Email = @Email, Telefono = @Telefono 
-        WHERE ClienteId = @IdC;";
+        Cliente cliente = null; //Uso el null para devolver en caso de no encontrar nada
 
-        try
+        string query = @"SELECT * FROM Cliente WHERE ClienteId = @id;";
+
+        using (SqliteConnection connection = new SqliteConnection(connectionString))
         {
-            using (SqliteConnection connection = new SqliteConnection(ConnectionString))
+            connection.Open();
+            SqliteCommand command = new SqliteCommand(query, connection);
+            command.Parameters.AddWithValue("@id", id);
+            using (SqliteDataReader reader = command.ExecuteReader())
             {
-                SqliteCommand command = new SqliteCommand(queryString, connection);
-                command.Parameters.AddWithValue("@IdC", cliente.ClienteId);
-                command.Parameters.AddWithValue("@Nombre", cliente.Nombre);
-                command.Parameters.AddWithValue("@Email", cliente.Email);
-                command.Parameters.AddWithValue("@Telefono", cliente.Telefono);
-
-                connection.Open();
-                int rowsAffected = command.ExecuteNonQuery(); // Obtiene el número de filas afectadas
-
-                // Retorna true solo si se actualizó al menos una fila
-                return rowsAffected > 0;
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error en PutCliente: {ex.Message}");
-            return false;
-        }
-    }
-
-    public Clientes GetCliente(int ClienteId)
-    {
-        try
-        {
-            using (SqliteConnection connection = new SqliteConnection(ConnectionString))
-            {
-                string queryString = @"SELECT * FROM Clientes 
-                WHERE ClienteId = @IdC;";
-
-                SqliteCommand command = new SqliteCommand(queryString, connection);
-                command.Parameters.AddWithValue("@IdP", ClienteId);
-
-                connection.Open();
-
-                using (SqliteDataReader reader = command.ExecuteReader())
+                if (reader.Read())
                 {
-                    if (reader.Read())
-                    {
-                        Clientes cliente = new Clientes();
-                        cliente.ClienteId = (Convert.ToInt32(reader["ClienteId"]));
-                        cliente.Nombre = reader["Nombre"].ToString();
-                        cliente.Email = reader["Email"].ToString();
-                        cliente.Telefono = reader["Telefono"].ToString();
-                        return cliente;
-                    }
+                    cliente = new Cliente();
+                    cliente.ClienteId = Convert.ToInt32(reader["ClienteId"]);
+                    cliente.Nombre = reader["Nombre"].ToString();
+                    cliente.Email = reader["Email"].ToString();
+                    cliente.Telefono = reader["Telefono"].ToString();
                 }
             }
+            connection.Close();
         }
-        catch (Exception ex)
+        if (cliente == null)
         {
-            Console.WriteLine($"Error en GetCliente: {ex.Message}");
+            throw new Exception("Cliente inexistente");
         }
-
-        return null;
+        return cliente;
     }
-
-    public bool DeleteCliente(int ClienteId)
+    public void EliminarCliente(int id)
     {
-        Clientes cliente = GetCliente(ClienteId);
+        string query = @"DELETE FROM Cliente WHERE ClienteId = @Id;";
 
-        if (cliente != null) 
+        using (SqliteConnection connection = new SqliteConnection(connectionString))
         {
-            int IdPresupuesto = presupuestosRepository.GetIdPresupuesto(ClienteId);
-            using (SqliteConnection connection = new SqliteConnection(ConnectionString))
-            {
-                connection.Open();
-                using (var transaction = connection.BeginTransaction())
-                {
-                    try
-                    {
-                        if(IdPresupuesto != 0) {
-                            bool deletePresupuesto = presupuestosRepository.DeletePresupuesto(IdPresupuesto);
-                        }
-                        string queryString = @"DELETE FROM Clientes WHERE ClienteId = @IdC;";
-
-                        using (SqliteCommand deleteCommand1 = new SqliteCommand(queryString, connection, transaction))
-                        {
-                            deleteCommand1.Parameters.AddWithValue("@IdC", ClienteId);
-                            int rowsAffected = deleteCommand1.ExecuteNonQuery();
-
-                            if (rowsAffected > 0)
-                            {
-                                transaction.Commit();
-                                return true;
-                            }
-                            else
-                            {
-                                transaction.Rollback();
-                                return false;
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        transaction.Rollback();
-                        Console.WriteLine($"Error en DeleteCliente: {ex.Message}");
-                        return false;
-                    }
-                }
-            }
+            connection.Open();
+            SqliteCommand command = new SqliteCommand(query, connection);
+            command.Parameters.AddWithValue("@Id", id);
+            command.ExecuteNonQuery();
+            connection.Close();
         }
-        return false;
     }
 }

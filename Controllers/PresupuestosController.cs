@@ -1,151 +1,354 @@
-using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using TP6.Models;
-
+using TP7.ViewModels;
 namespace TP6.Controllers;
+
 
 public class PresupuestosController : Controller
 {
-    private readonly ILogger<PresupuestosController> _logger;
-    private PresupuestosRepository presupuestosRepository;
-    private ProductosRepository productosRepository;
 
-    public PresupuestosController(ILogger<PresupuestosController> logger)
+    private readonly ILogger<PresupuestosController> _logger;
+
+    private IPresupuestoRepository repoPresupuestos;
+
+    private IProductosRepository repoProductos;
+
+    private IClientesRepository repoClientes;
+    public PresupuestosController(ILogger<PresupuestosController> logger, IPresupuestoRepository repoPresupuestos, IProductosRepository repoProductos, IClientesRepository repoClientes)
     {
         _logger = logger;
-        presupuestosRepository = new PresupuestosRepository();
-        productosRepository = new ProductosRepository();
+        this.repoPresupuestos = repoPresupuestos;
+        this.repoProductos = repoProductos;
+        this.repoClientes = repoClientes;
     }
+
     public IActionResult Index()
     {
-        return View(presupuestosRepository.GetPresupuestos());
-    }
-
-    [HttpGet]
-    public IActionResult CrearPresupuesto()
-    {
-        return View(new Presupuestos());
-    }
-    [HttpPost]
-    public IActionResult CrearPresupuesto(Presupuestos presupuesto)
-    {
-        if (!ModelState.IsValid) { return View(presupuesto); }
-
-        var success = presupuestosRepository.PostPresupuesto(presupuesto);
-
-        if (success)
-        {
-            return RedirectToAction("Index");
+        try
+        {            
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("User"))) return RedirectToAction ("Index", "Login");
+            ViewData["EsAdmin"] = HttpContext.Session.GetString("AccessLevel") == "Admin";
+            return View(repoPresupuestos.ObtenerPresupuestos());
         }
-        else
-        {
-            ModelState.AddModelError("", "Hubo un problema al crear el presupuesto. Por favor, intente nuevamente.");
-            return View(presupuesto);
+        catch (Exception ex)
+        {             
+            _logger.LogError(ex.ToString());
+            ViewBag.ErrorMessage("No se pudo cargar el listado de presupuestos.");
+            return RedirectToAction("Index", "Productos");
         }
     }
 
     [HttpGet]
-    public IActionResult EditarPresupuesto(int IdPresupuesto)
-    {
-        Presupuestos presupuesto = presupuestosRepository.GetPresupuesto(IdPresupuesto);
-        if (presupuesto == null) { return NotFound(); }
-        return View(presupuesto);
-    }
-    [HttpPost]
-    public IActionResult EditarPresupuesto(Presupuestos presupuesto)
-    {
-        if (!ModelState.IsValid) { return View(presupuesto); }
 
-        var success = presupuestosRepository.PutPresupuesto(presupuesto);
-        if (success)
+
+    public IActionResult DetallesDelPresupuesto(int id)
+    {
+        try
+        {            
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("User"))) return RedirectToAction ("Index", "Login");
+            return View(repoPresupuestos.ObtenerPresupuestoPorId(id));
+        }
+        catch (Exception ex)
         {
+            _logger.LogError(ex.ToString());
+            ViewBag.ErrorMessage("No se pudo cargar el presupuesto.");
             return RedirectToAction("Index");
         }
-        else
+    }
+
+    [HttpGet]
+    public IActionResult AltaPresupuesto()
+    {
+        try
         {
-            ModelState.AddModelError("", "Hubo un problema al actualizar el presupuesto. Por favor, intente nuevamente.");
-            return View(presupuesto);
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("User"))) 
+                return RedirectToAction("Index", "Login");
+
+            if (HttpContext.Session.GetString("AccessLevel") != "Admin")
+            {
+                TempData["ErrorMessage"] = "No tienes permisos para realizar esta acción.";
+                return RedirectToAction("Index");
+            }
+
+            List<Cliente> Clientes = repoClientes.ObtenerClientes();
+            ViewData["Clientes"] = Clientes.Select(c => new SelectListItem
+            {
+                Value = c.ClienteId.ToString(),
+                Text = c.Nombre
+            }).ToList();
+
+            return View();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
+            ViewBag.ErrorMessage = "No se pudo cargar la lista de clientes para el presupuesto.";
+            return RedirectToAction("Index");
         }
     }
 
-    public IActionResult EliminarPresupuesto(int IdPresupuesto)
+  [HttpPost]
+    public IActionResult CrearPresupuesto(AltaPresupuestoViewModel presupuestoVM)
     {
-        var success = presupuestosRepository.DeletePresupuesto(IdPresupuesto);
+        try
+        {
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("User"))) 
+                return RedirectToAction("Index", "Login");
 
-        if (!success) { ModelState.AddModelError("", "Hubo un problema al eliminar el presupuesto. Por favor, intente nuevamente."); }
+            if (HttpContext.Session.GetString("AccessLevel") != "Admin")
+            {
+                TempData["ErrorMessage"] = "No tienes permisos para realizar esta acción.";
+                return RedirectToAction("Index");
+            }
+
+            if (!ModelState.IsValid) 
+                return RedirectToAction("Index");
+
+            var presupuesto = new Presupuesto(presupuestoVM);
+            repoPresupuestos.CrearPresupuesto(presupuesto);
+            return RedirectToAction("Index");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
+            ViewBag.ErrorMessage = "No se pudo crear el presupuesto.";
+            return RedirectToAction("AltaPresupuesto");
+        }
+    }
+
+    [HttpGet]
+
+   public IActionResult AgregarProductoAPresupuesto(int id)
+{
+    try
+    {
+        if (string.IsNullOrEmpty(HttpContext.Session.GetString("User"))) 
+            return RedirectToAction("Index", "Login");
+
+        if (HttpContext.Session.GetString("AccessLevel") != "Admin")
+        {
+            TempData["ErrorMessage"] = "No tienes permisos para realizar esta acción.";
+            return RedirectToAction("Index");
+        }
+
+        List<Producto> productos = repoProductos.ObtenerProductos();
+        ViewData["Productos"] = productos.Select(p => new SelectListItem
+        {
+            Value = p.IdProducto.ToString(),
+            Text = p.Descripcion
+        }).ToList();
+
+        var model = new AgregarProductoAPresuViewModel();
+        model.IdPresupuesto = id;
+
+        return View(model);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex.ToString());
+        ViewBag.ErrorMessage = "No se pudo cargar la lista de productos para el presupuesto seleccionado.";
         return RedirectToAction("Index");
     }
+}
 
-    [HttpGet]
-    public IActionResult EditarPresupuestoDetalle(int IdPresupuesto, int IdProducto)
+[HttpPost]
+public IActionResult AgregarProductoEnPresupuesto(AgregarProductoAPresuViewModel infoProducto)
+{
+    try
     {
-        Presupuestos presupuestos = new Presupuestos();
-        presupuestos.IdPresupuesto = IdPresupuesto;
-        PresupuestosDetalles presupuestosDetalles = presupuestosRepository.GetPresupuestoDetalle(IdPresupuesto, IdProducto);
+        if (string.IsNullOrEmpty(HttpContext.Session.GetString("User"))) 
+            return RedirectToAction("Index", "Login");
 
-        if (presupuestosDetalles == null) { return NotFound(); }
-
-        presupuestos.Detalles.Add(presupuestosDetalles);
-        return View(presupuestos);
-    }
-    [HttpPost]
-    public IActionResult EditarPresupuestoDetalle(Presupuestos presupuesto)
-    {
-        var detalle = presupuesto.Detalles.FirstOrDefault();
-        if (detalle == null)
+        if (HttpContext.Session.GetString("AccessLevel") != "Admin")
         {
-            ModelState.AddModelError("", "Detalle de presupuesto no encontrado.");
-            return View(presupuesto);
-        }
-
-        var success = presupuestosRepository.PutPresupuestoDetalle(presupuesto.IdPresupuesto, detalle.producto.IdProducto, detalle.Cantidad > 0 ? detalle.Cantidad : 1);
-
-        if (success)
-        {
+            TempData["ErrorMessage"] = "No tienes permisos para realizar esta acción.";
             return RedirectToAction("Index");
         }
-        else
-        {
-            ModelState.AddModelError("", "Hubo un problema al actualizar el detalle del presupuesto. Por favor, intente nuevamente.");
-            return View(presupuesto);
-        }
-    }
 
-    public IActionResult EliminarPresupuestoDetalle(int IdPresupuesto, int IdProducto)
-    {
-        var success = presupuestosRepository.DeletePresupuestoDetalle(IdPresupuesto, IdProducto);
+        if (!ModelState.IsValid) 
+            return RedirectToAction("Index");
 
-        if (!success) { ModelState.AddModelError("", "Hubo un problema al eliminar el detalle del presupuesto. Por favor, intente nuevamente."); }
+        repoPresupuestos.AgregarProducto(infoProducto.IdPresupuesto, infoProducto.IdProducto, infoProducto.Cantidad);
         return RedirectToAction("Index");
     }
-
-    [HttpGet]
-    public IActionResult AgregarProducto()
+    catch (Exception ex)
     {
-        var productos = productosRepository.GetProductos();
-        return View(productos);
+        _logger.LogError(ex.ToString());
+        ViewBag.ErrorMessage = "No se pudo agregar el producto al presupuesto seleccionado.";
+        return RedirectToAction("Index");
     }
-    [HttpPost]
-    public IActionResult AgregarProducto(int IdPresupuesto, int IdProducto, int Cantidad)
-    {
-        if (Cantidad <= 0) { Cantidad = 1; }
+}
 
-        var producto = productosRepository.GetProducto(IdProducto);
-        if (producto == null)
+[HttpGet]
+public IActionResult EliminarProductoAPresupuesto(int id)
+{
+    try
+    {
+        if (string.IsNullOrEmpty(HttpContext.Session.GetString("User"))) 
+            return RedirectToAction("Index", "Login");
+
+        if (HttpContext.Session.GetString("AccessLevel") != "Admin")
         {
-            ModelState.AddModelError("", "Producto no encontrado.");
+            TempData["ErrorMessage"] = "No tienes permisos para realizar esta acción.";
             return RedirectToAction("Index");
         }
 
-        PresupuestosDetalles presupuestoDetalle = new PresupuestosDetalles
+        Presupuesto presupuesto = repoPresupuestos.ObtenerPresupuestoPorId(id);
+        ViewData["Productos"] = presupuesto.Detalle.Select(p => new SelectListItem
         {
-            Cantidad = Cantidad,
-            producto = producto
+            Value = p.Producto.IdProducto.ToString(),
+            Text = p.Producto.Descripcion
+        }).ToList();
+
+        return View(id);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex.ToString());
+        ViewBag.ErrorMessage = "No se pudo cargar la lista de productos para eliminar.";
+        return RedirectToAction("Index");
+    }
+}
+    public IActionResult EliminarProductoEnPresupuesto(int idPresupuesto, int idProducto)
+{
+    try
+    {
+        if (string.IsNullOrEmpty(HttpContext.Session.GetString("User"))) 
+            return RedirectToAction("Index", "Login");
+
+        if (HttpContext.Session.GetString("AccessLevel") != "Admin")
+        {
+            TempData["ErrorMessage"] = "No tienes permisos para realizar esta acción.";
+            return RedirectToAction("Index");
+        }
+
+        repoPresupuestos.EliminarProducto(idPresupuesto, idProducto);
+        return RedirectToAction("Index");
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex.ToString());
+        ViewBag.ErrorMessage = "No se pudo eliminar el producto del presupuesto.";
+        return RedirectToAction("Index");
+    }
+}
+
+[HttpGet]
+public IActionResult ModificarPresupuesto(int id)
+{
+    try
+    {
+        if (string.IsNullOrEmpty(HttpContext.Session.GetString("User"))) 
+            return RedirectToAction("Index", "Login");
+
+        if (HttpContext.Session.GetString("AccessLevel") != "Admin")
+        {
+            TempData["ErrorMessage"] = "No tienes permisos para realizar esta acción.";
+            return RedirectToAction("Index");
+        }
+
+        List<Cliente> Clientes = repoClientes.ObtenerClientes();
+        ViewData["Clientes"] = Clientes.Select(c => new SelectListItem
+        {
+            Value = c.ClienteId.ToString(),
+            Text = c.Nombre
+        }).ToList();
+
+        var presupuesto = repoPresupuestos.ObtenerPresupuestoPorId(id);
+        var presupuestoVM = new ModificarPresupuestoViewModel
+        {
+            IdPresupuesto = id,
+            FechaCreacion = presupuesto.FechaCreacion
         };
 
-        var success = presupuestosRepository.PostPresupuestoDetalle(IdPresupuesto, presupuestoDetalle);
-
-        if (!success) { ModelState.AddModelError("", "Hubo un problema al agregar el producto. Por favor, intente nuevamente."); }
+        return View(presupuestoVM);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex.ToString());
+        ViewBag.ErrorMessage = "No se pudo cargar el presupuesto para modificarlo.";
         return RedirectToAction("Index");
     }
+}
+
+[HttpPost]
+public IActionResult ModificarPresupuesto(ModificarPresupuestoViewModel presupuestoVM)
+{
+    try
+    {
+        if (string.IsNullOrEmpty(HttpContext.Session.GetString("User"))) 
+            return RedirectToAction("Index", "Login");
+
+        if (HttpContext.Session.GetString("AccessLevel") != "Admin")
+        {
+            TempData["ErrorMessage"] = "No tienes permisos para realizar esta acción.";
+            return RedirectToAction("Index");
+        }
+
+        if (!ModelState.IsValid) 
+            return RedirectToAction("Index");
+
+        var presupuesto = new Presupuesto(presupuestoVM);
+        repoPresupuestos.ModificarPresupuesto(presupuesto);
+        return RedirectToAction("Index");
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex.ToString());
+        ViewBag.ErrorMessage = "No se pudo modificar el presupuesto.";
+        return RedirectToAction("Index");
+    }
+}
+
+[HttpGet]
+public IActionResult EliminarPresupuesto(int id)
+{
+    try
+    {
+        if (string.IsNullOrEmpty(HttpContext.Session.GetString("User"))) 
+            return RedirectToAction("Index", "Login");
+
+        if (HttpContext.Session.GetString("AccessLevel") != "Admin")
+        {
+            TempData["ErrorMessage"] = "No tienes permisos para realizar esta acción.";
+            return RedirectToAction("Index");
+        }
+
+        return View(repoPresupuestos.ObtenerPresupuestoPorId(id));
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex.ToString());
+        ViewBag.ErrorMessage = "No se pudo cargar el presupuesto para eliminar.";
+        return RedirectToAction("Index");
+    }
+}
+
+[HttpGet]
+public IActionResult EliminarPresupuestoPorId(int id)
+{
+    try
+    {
+        if (string.IsNullOrEmpty(HttpContext.Session.GetString("User"))) 
+            return RedirectToAction("Index", "Login");
+
+        if (HttpContext.Session.GetString("AccessLevel") != "Admin")
+        {
+            TempData["ErrorMessage"] = "No tienes permisos para realizar esta acción.";
+            return RedirectToAction("Index");
+        }
+
+        repoPresupuestos.EliminarPresupuestoPorId(id);
+        return RedirectToAction("Index");
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex.ToString());
+        ViewBag.ErrorMessage = "No se pudo eliminar el presupuesto.";
+        return RedirectToAction("Index");
+    }
+}
+
 }

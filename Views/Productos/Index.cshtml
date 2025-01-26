@@ -1,19 +1,30 @@
 @using TP6.Models
-@model List<Productos>;
+@model List<Producto>
 
-@{
-    ViewData["Title"] = "Todos los Productos";
+@if (ViewBag.ErrorMessage != null)
+{
+        <div class="error-message">
+            <p>@ViewBag.ErrorMessage</p>
+        </div>
 }
 
-<h1>@ViewData["Title"]</h1>
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger" role="alert">
+        @TempData["ErrorMessage"]
+    </div>
+}
+<h2>Lista de Productos</h2>
 
-<table class="table">
+<table class="table table-bordered text-light">
     <thead>
         <tr>
-            <th>Nombre</th>
+            <th>Descripción</th>
             <th>Precio</th>
-            <th>Editar</th>
-            <th>Eliminar</th>
+            @if ((bool)ViewData["EsAdmin"])
+            {
+                <th>Acciones</th>
+            }
         </tr>
     </thead>
     <tbody>
@@ -21,17 +32,27 @@
         {
             <tr>
                 <td>@producto.Descripcion</td>
-                <td>$@producto.Precio</td>
-                <td>
-                    <a class="btn btn-primary" asp-controller="Productos" asp-action="EditarProducto"
-                    asp-route-IdProducto="@producto.IdProducto">Editar</a>
-                </td>
-                <td>
-                    <a class="btn btn-danger" asp-controller="Productos" asp-action="EliminarProducto"
-                    asp-route-IdProducto="@producto.IdProducto"
-                    onclick="return confirm('¿Estas seguro que quieres eliminar el elemento?')">Eliminar</a>
-                </td>
+                <td>$ @producto.Precio.ToString()</td>
+                @if ((bool)ViewData["EsAdmin"])
+                {
+                    <td>    
+                        <a asp-controller="Productos" asp-action="ModificarProducto" asp-route-id="@producto.IdProducto" class="btn btn-warning">Editar</a>
+                        <a asp-controller="Productos" asp-action="EliminarProducto" asp-route-id="@producto.IdProducto" class="btn btn-danger">Eliminar</a>
+                    </td>
+                }
             </tr>
         }
     </tbody>
 </table>
+
+<div class="text-center">
+    @if ((bool)ViewData["EsAdmin"])
+    {
+        <a asp-controller="Productos" asp-action="AltaProducto" class="btn btn-success">Alta producto</a>
+    }
+</div>
+
+
+
+
+
