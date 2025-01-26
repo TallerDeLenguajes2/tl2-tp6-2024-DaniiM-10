@@ -3,6 +3,7 @@ using Microsoft.Data.Sqlite;
 using TP6.Models;
 using TP7.ViewModels;
 
+
 public class ClientesRepository : IClientesRepository
 {
     private readonly ILogger<ClientesRepository> _logger;
