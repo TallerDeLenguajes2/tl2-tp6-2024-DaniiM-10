@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 namespace TP7.ViewModels;
 
+
 public class AgregarProductoAPresuViewModel
 {
     public int IdPresupuesto { get; set; }
