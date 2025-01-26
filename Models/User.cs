@@ -26,5 +26,4 @@ public enum AccessLevel
     Admin, 
 
     Cliente
-
 }
